@@ -1,0 +1,65 @@
+---
+- hosts: VM1
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - file: 
+        path: /var/customlogs/logs 
+        state: directory 
+        mode: 0755
+
+    - name: Load average calculation 
+      script: /etc/ansible/q4.sh
+
+   
+    - fetch:
+       src: /var/customlogs/logs/200208720VM1.csv
+       dest: /var/customlogs/logs/
+       flat: yes
+
+- hosts: VM2
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - file:
+        path: /var/customlogs/logs
+        state: directory
+        mode: 0755
+
+    - name: Load average calculation
+      script: /etc/ansible/q4.sh
+
+
+    - fetch:
+       src: /var/customlogs/logs/200208720lab2VM2.csv
+       dest: /var/customlogs/logs/
+       flat: yes
+
+
+- hosts: localhost
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - file:
+        path: /var/customlogs/logs
+        state: directory
+        mode: 0755
+
+    - name: Load average calculation
+      script: /etc/ansible/q4.sh
+
+
+    - fetch:
+       src: /var/customlogs/logs/ece792-Standard-PC-i440FX-PIIX-1996.csv
+       dest: /var/customlogs/logs/
+       flat: yes
+

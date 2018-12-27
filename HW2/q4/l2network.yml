@@ -1,0 +1,21 @@
+- hosts: localhost
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+  tasks:                # Defining tasks for the playbook
+    
+    - name: Creating an l2 bridge
+      openvswitch_bridge:
+        bridge: ppacha_bridge
+        state: present
+    - name: Defining a network
+      virt_net:
+        command: define
+        name: ppacha-netl2
+        xml: '{{ lookup("template", "/etc/libvirt/qemu/networks/ppacha-netl2.xml") }}'
+    - name: Starting the Network
+      virt_net:
+        command: create
+        name: ppacha-netl2
+        state: active

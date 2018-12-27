@@ -1,0 +1,32 @@
+run these files from /etc/ansible folder 
+I am also atatching the host file 
+
+
+
+======================= creation of l2 network =============
+
+Assumption has been made that a static xml file location for ppacha-netl2 exist
+With that file we are defining and starting the networ ppacha-netlet2
+Run the file ----l2network.yml 
+
+===================== creation of VMs =========
+
+We are running the sudo virsh install command 
+It installs two new VMs 
+1. VM_script1
+2. VM_script2
+and attache sthem to the ppacha-netl2
+
+Run the script  -- q4_createvm.yml
+
+===================log collection ========
+
+We have changed the host names of the VMs 
+In the hosst file we are creating two dfferent VM lists
+[VM1] 
+[VM2]
+
+as we are using the bc in our bash scripts 
+VM have to be installed with bc utility
+it internally uses the q4.sh utility
+for  logcollectio run thefollowing  file  -------- ansible-playbook q4_logcollection.yml

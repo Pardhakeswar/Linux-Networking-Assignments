@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+  
+  vars_prompt:
+   - name: "ref_vm_name"
+     prompt: "Enter name of reference VM(to be used for xml copying) present in your system in format (VM1 or VM2)"
+     private: no
+
+  tasks:
+
+   - name: Creating a New XMl file
+     command: python /etc/ansible/xml_modify_bonus.py {{ref_vm_name}} {{item.key}} {{item.value}}
+     become: yes
+     with_dict: "{{names}}"
+
+   - name: Define a VM2
+     virt:
+      name: '{{item.key}}'
+      command: define
+      xml: "{{ lookup('template', '/etc/libvirt/qemu/{{item.key}}.xml') }}"
+     with_dict: "{{names}}"
+
+   - name: Start the VM
+     virt:
+      name: '{{item.key}}'
+      state: running
+      uri: 'qemu:///system'
+     with_dict: "{{names}}"

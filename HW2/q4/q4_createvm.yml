@@ -1,0 +1,18 @@
+- hosts: localhost
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+  
+  tasks:
+    - name: creating the 1st Virtual Machine
+      command: sudo virt-install -n VM_script1 -r 2048 --vcpu=4 --cpu host --disk path=/var/lib/libvirt/images/VM_script1.img,size=10 --network network=default -c /home/ece792/vm1/CentOS-7-x86_64-Minimal-1804.iso -v 
+   
+    - name: Creating the 2nd virtual Machine
+      command: sudo virt-install -n VM_script2 -r 2048 --vcpu=4 --cpu host --disk path=/var/lib/libvirt/images/VM_script2.img,size=10 --network network=default -c /home/ece792/vm1/CentOS-7-x86_64-Minimal-1804.iso -v
+
+    - name: Attaching the l2 network to the 1st VM
+      command: sudo virsh attach-interface --domain VM_script1 --type network --source ppacha-netl2 --model virtio  --config --live
+   
+    - name: Attaching the l2 network to the 2nd  VM
+      command: sudo virsh attach-interface --domain VM_script2 --type network --source ppacha-netl2 --model virtio  --config --live

@@ -1,0 +1,204 @@
+---
+
+- hosts: localhost
+  become: yes
+  become_user : root
+  become_method: sudo
+  gather_facts: no
+
+  vars_prompt:
+    - name: "ip_sw1"
+      prompt: "Ip for SW1-nat mode in format 192.168.x.x/24 "
+      private: no
+    
+    - name: "ip_sw3"
+      prompt: "Ip for SW3-routed mode in format 192.168.x.x/24 "
+      private: no
+
+    - name: "ip_sw4"
+      prompt: "Ip for SW4-other routed in format 192.168.x.x/24 "
+      private: no
+
+    - name: "ref_vm_name"
+      prompt: "Enter name of reference VM(to be used for xml copying) present in your system in format (VM1 or VM2)" 
+      private: no
+
+    - name: "VM1_name"
+      prompt: "Enter name of first Vm "
+      private: no
+
+    - name: "VM2_name" 
+      prompt: "Enter name of second VM"
+      private: no
+
+## Package Installations
+  tasks:
+   - name: Check for qemu-kvm
+     apt:
+       name: qemu-kvm
+       state: present
+
+   - name: Check for libvirt packages and ovs
+     apt:
+      name: "{{ item }}"
+      state: present
+     with_items:
+       - libvirt-bin
+       - virt-manager
+       - virt-viewer
+       - openvswitch-switch
+       - dnsmasq
+
+     #creating the ovs-bridges
+
+   - name: Create an OVS Bridge for Network1
+     openvswitch_bridge:
+      bridge: SW1
+      state: present
+
+   - name: Create an OVS Bridge for Network2
+     openvswitch_bridge:
+      bridge: SW2
+      state: present
+
+   - name: Create an OVS Bridge for Network3
+     openvswitch_bridge:
+      bridge: SW3
+      state: present
+
+   - name: Create an OVS Bridge for Network4
+     openvswitch_bridge:
+      bridge: SW4
+      state: present
+   
+     #Network1 nat mode
+
+   - name: Define a Network1
+     virt_net:
+      command: define
+      name: ovs-net-nat
+      xml: '{{ lookup("template", "ovs-net-nat.xml") }}'
+    
+   
+   - name: Start the Network1
+     virt_net:
+      command: create
+      name: ovs-net-nat
+
+   - name: Define IP for SW1
+     command: ip addr add {{ip_sw1}} dev SW1 
+ 
+   - name: Making SW1 interface up
+     command: ip link set SW1 up
+ 
+   - name: Enabling the DNS configuration up for Network1
+     command: bash dns-config.sh SW1 {{ip_sw1}} 
+  
+   - name: Configuring the iptables
+     command: bash iptables-nat-config.sh {{ip_sw1}} SW1 
+ 
+    #Network 2 L2 bridge
+
+   - name: Define a Network2
+     virt_net:
+      command: define
+      name: ovs-net-l2
+      xml: '{{ lookup("template", "ovs-net-l2.xml") }}'
+  
+   - name: Start the Network2-L2
+     virt_net:
+      command: create
+      name: ovs-net-l2
+
+   - name: Making SW2 interface up
+     command: ip link set SW2 up
+
+     #Network3 routed mode 
+
+   
+   - name: Define a Network3
+     virt_net:
+      command: define
+      name: ovs-net-routed
+      xml: '{{ lookup("template", "ovs-net-routed.xml") }}'
+
+   - name: Start the Network3
+     virt_net:
+      command: create
+      name: ovs-net-routed
+
+   - name: Making SW3 interface up
+     command: ip link set SW3 up
+
+   - name: Define IP for SW3
+     command: ip addr add {{ip_sw3}} dev SW3
+  
+   - name: Enabling the DNS configuration up for Network1
+     command: bash dns-config.sh SW3 {{ip_sw3}}
+
+   - name: Configuring the iptables
+     command: bash iptables-routed-config.sh {{ip_sw3}} SW3
+
+    #Network4 other routed mode
+
+   - name: Define a Network4
+     virt_net:
+      command: define
+      name: ovs-net-other
+      xml: '{{ lookup("template", "ovs-net-other.xml") }}'
+
+   - name: Start the Network4
+     virt_net:
+      command: create
+      name: ovs-net-other
+
+   - name: Making SW4 interface up
+     command: ip link set SW4 up
+
+   - name: Define IP for SW4
+     command: ip addr add {{ip_sw4}} dev SW4
+
+#commenting out this path as this have error in ubuntu incentos
+#   #VM Image Creation
+#   - name: Create an Image
+#     command: virt-builder centos-7.0  --install iperf3,wireshark --format qcow2 -o /var/lib/libvirt/images/'{{ old_name }}'.img
+#     become: yes
+#     become_user: root
+
+
+# Vm creation
+   - name: Creating a New XMl file
+     command: python /etc/ansible/xml_modify.py {{ref_vm_name}} {{VM1_name}}
+     become: yes
+
+   - name: Define a VM
+     virt:
+      name: '{{VM1_name}}'
+      command: define
+      xml: "{{ lookup('template', '/etc/libvirt/qemu/{{VM1_name}}.xml') }}"
+      uri: 'qemu:///system'
+
+   - name: Start the VM
+     virt:
+      name: '{{VM1_name}}'
+      state: running
+      uri: 'qemu:///system'
+    
+    #VM2 creation 
+
+   - name: Creating a New XMl file
+     command: python /etc/ansible/xml_modify.py {{ref_vm_name}} {{VM2_name}}
+     become: yes
+
+   - name: Define a VM2
+     virt:
+      name: '{{VM2_name}}'
+      command: define
+      xml: "{{ lookup('template', '/etc/libvirt/qemu/{{VM2_name}}.xml') }}"
+    
+   - name: Start the VM
+     virt:
+      name: '{{VM2_name}}'
+      state: running
+      uri: 'qemu:///system'
+ 

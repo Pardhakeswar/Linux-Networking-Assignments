@@ -1,0 +1,100 @@
+===============================Iperf performance with packet size variation ===========================
+
+
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 100B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51664 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  66.1 MBytes  55.4 Mbits/sec
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 200B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51666 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec   132 MBytes   111 Mbits/sec
+
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 400B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51670 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec   264 MBytes   222 Mbits/sec
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 800B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51672 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec   529 MBytes   444 Mbits/sec
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 1600B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51674 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.03 GBytes   887 Mbits/sec
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 3200B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TC
+P window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51676 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  2.07 GBytes  1.77 Gbits/sec
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -c 192.168.122.148 -t 10 -l 6400B
+------------------------------------------------------------
+Client connecting to 192.168.122.148, TCP port 5001
+TCP window size: 2.50 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.122.148 port 51678 connected with 192.168.122.148 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  4.13 GBytes  3.55 Gbits/sec
+
+
+
+
+
+ =====================================Server side observation ============================
+
+ece792@ece792-Standard-PC-i440FX-PIIX-1996:~$ iperf -s 192.168.122.148
+iperf: ignoring extra argument -- 192.168.122.148
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[  4] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51664
+[ ID] Interval       Transfer     Bandwidth
+[  4]  0.0-10.0 sec  66.1 MBytes  55.4 Mbits/sec
+[  5] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51666
+[  5]  0.0-10.0 sec   132 MBytes   111 Mbits/sec
+[  5] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51670
+[  5]  0.0-10.0 sec   264 MBytes   222 Mbits/sec
+[  4] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51672
+[  4]  0.0-10.0 sec   529 MBytes   443 Mbits/sec
+[  5] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51674
+[  5]  0.0-10.0 sec  1.03 GBytes   886 Mbits/sec
+[  4] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51676
+[  4]  0.0-10.0 sec  2.07 GBytes  1.77 Gbits/sec
+[  5] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51678
+[  5]  0.0-10.0 sec  4.13 GBytes  3.55 Gbits/sec
+[  4] local 192.168.122.148 port 5001 connected with 192.168.122.148 port 51680
+[  4]  0.0-10.0 sec  4.14 GBytes  3.55 Gbits/sec
+
+
+
+=============================================Observation =====================================
+
+With the increase in packet size i,e(doubling the size of packet)the throughput and bandwidth is almost getting doubled as TCP performance increases 
+with the increase in packet size the no of system calls to be made becomes less.
+
+ 
